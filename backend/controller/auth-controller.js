@@ -2,7 +2,7 @@ module.exports = {
   indentify: (req, res) => {
     const userInfo = {
       id: 20211011,
-      name: "J18B에서 github-action 테스트 한번더 제발 => host, username 수정 + port도 수정",
+      name: "J18B에서 github-action 테스트 오늘 마지막 테스트",
     };
     res.json({
       code: 200,
