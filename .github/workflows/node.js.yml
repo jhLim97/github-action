@@ -6,13 +6,104 @@ name: Node.js CI Test
 on:
   pull_request:
     types: [closed]
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-18.04
-
     strategy:
       matrix:
         node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+  pull-repository:
+    runs-on: ubuntu-18.04
+    needs: build
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /root/action-test/github-action
+            git pull origin main
+  
+  npm-install-backend:
+    runs-on: ubuntu-18.04
+    needs: pull-repository
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /root/action-test/github-action/backend
+            npm install
+            
+  npm-install-frontend:
+    runs-on: ubuntu-18.04  
+    needs: pull-repository
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /root/action-test/github-action/frontend
+            npm install
+
+  build-frontend:
+    runs-on: ubuntu-18.04
+    needs: npm-install-frontend
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /root/action-test/github-action/frontend
+            rm -rf /var/www/action-test
+            mkdir /var/www/action-test
+            rm -rf build
+            npm run build
+            cp -r build/* /var/www/action-test
+            
+  restart-nginx:
+    runs-on: ubuntu-18.04
+    needs: build-frontend
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            sudo systemctl restart nginx
+            
+  restart-pm2:
+    runs-on: ubuntu-18.04
+    needs: [npm-install-backend, restart-nginx]
+    steps:
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            pm2 reload all 
