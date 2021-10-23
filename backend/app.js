@@ -10,7 +10,7 @@ var app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://101.101.218.62",
     credentials: true,
   })
 );
@@ -21,6 +21,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 module.exports = app;

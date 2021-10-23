@@ -4,7 +4,7 @@ function App() {
   const [username, setUsername] = useState("서버 통신테스트");
 
   useEffect(() => {
-    const indentifyUrl = "http://localhost:5000/auth/indentify";
+    const indentifyUrl = "http://101.101.218.62/api/auth/indentify";
     try {
       fetch(indentifyUrl)
         .then((respones) => respones.json())
