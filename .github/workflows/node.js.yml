@@ -51,6 +51,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /root/action-test/github-action/backend
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             npm install
 
   npm-install-frontend:
@@ -65,6 +67,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /root/action-test/github-action/frontend
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             npm install
 
   build-frontend:
