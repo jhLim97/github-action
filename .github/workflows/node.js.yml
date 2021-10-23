@@ -86,6 +86,8 @@ jobs:
             rm -rf /var/www/action-test
             mkdir /var/www/action-test
             rm -rf build
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             npm run build
             cp -r build/* /var/www/action-test
 
