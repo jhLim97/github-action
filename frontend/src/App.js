@@ -1,25 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
 
 function App() {
+  const [username, setUsername] = useState("서버 통신테스트");
+
+  useEffect(() => {
+    const indentifyUrl = "http://localhost:5000/auth/indentify";
+    try {
+      fetch(indentifyUrl)
+        .then((respones) => respones.json())
+        .then((result) => setUsername(result.data.name));
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <header className="App-header">{username}</header>
     </div>
   );
 }
-
 export default App;
